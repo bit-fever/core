@@ -28,7 +28,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/bit-fever/core/auth/roles"
+	"github.com/bit-fever/core/auth/role"
 	"github.com/bit-fever/core/req"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
@@ -61,7 +61,7 @@ type userToken struct {
 //-----------------------------------------------------------------------------
 
 type realmRoles struct {
-	Roles []roles.Role `json:"roles,omitempty"`
+	Roles []role.Role `json:"roles,omitempty"`
 }
 
 //=============================================================================
@@ -88,7 +88,7 @@ func NewOidcController(authority string, client *http.Client) (*OidcController, 
 
 //=============================================================================
 
-func (oc *OidcController) Secure(h func(c *gin.Context, us *UserSession), roles []roles.Role) func(c *gin.Context) {
+func (oc *OidcController) Secure(h func(c *gin.Context, us *UserSession), roles []role.Role) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		rawAccessToken := c.Request.Header.Get("Authorization")
 		tokens := strings.Split(rawAccessToken, " ")
@@ -112,7 +112,7 @@ func (oc *OidcController) Secure(h func(c *gin.Context, us *UserSession), roles 
 		us := buildUserSession(&ut, idToken)
 
 		if ! us.IsUserInRole(roles) {
-			req.ReturnUnauthorizedError(c, "User not allowed to access this API")
+			req.ReturnForbiddenError(c, "User not allowed to access this API")
 			return
 		}
 
@@ -141,8 +141,8 @@ func buildUserSession(ut *userToken, it *oidc.IDToken) *UserSession {
 
 //=============================================================================
 
-func buildRoleMap(ut *userToken) map[roles.Role]any {
-	userRoles := map[roles.Role]any{}
+func buildRoleMap(ut *userToken) map[role.Role]any {
+	userRoles := map[role.Role]any{}
 
 	for k,v := range ut.ResourceAccess {
 		if k != "account" {

@@ -44,6 +44,17 @@ func NewRequestError(message string, params ...any) error {
 
 //=============================================================================
 
+func NewAccessError(message string, params ...any) error {
+	msg := fmt.Sprintf(message, params)
+	err := AppError{
+		AccessError: errors.New(msg),
+	}
+
+	return err
+}
+
+//=============================================================================
+
 func NewServerError(message string, params ...any) error {
 	msg := fmt.Sprintf(message, params)
 	err := AppError{
@@ -73,6 +84,8 @@ func ReturnError(c *gin.Context, err error) {
 		if errors.As(err, &ae) {
 			if ae.RequestError != nil {
 				writeError(c, http.StatusBadRequest, err.Error(), nil)
+			} else if ae.AccessError != nil {
+				writeError(c, http.StatusForbidden, err.Error(), nil)
 			} else if ae.ServerError != nil {
 				writeError(c, http.StatusInternalServerError, err.Error(), nil)
 			} else {
@@ -88,6 +101,12 @@ func ReturnError(c *gin.Context, err error) {
 
 func ReturnUnauthorizedError(c *gin.Context, message string) {
 	writeError(c, http.StatusUnauthorized, message, nil)
+}
+
+//=============================================================================
+
+func ReturnForbiddenError(c *gin.Context, message string) {
+	writeError(c, http.StatusForbidden, message, nil)
 }
 
 //=============================================================================

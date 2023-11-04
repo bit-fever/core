@@ -22,18 +22,14 @@ THE SOFTWARE.
 */
 //=============================================================================
 
-package roles
-
-import "github.com/bit-fever/core/auth/role"
+package role
 
 //=============================================================================
 
-var Admin     = []role.Role{ role.Admin }
-var User      = []role.Role{ role.User }
-var Service   = []role.Role{ role.Service }
+type Role string
 
-var Admin_User         = []role.Role{ role.Admin, role.User }
-var Admin_Service      = []role.Role{ role.Admin, role.Service }
-var Admin_User_Service = []role.Role{ role.Admin, role.User, role.Service }
+const Admin   Role = "admin"
+const User    Role = "user"
+const Service Role = "service"
 
 //=============================================================================

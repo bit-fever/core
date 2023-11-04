@@ -28,6 +28,7 @@ package req
 
 type AppError struct {
 	RequestError error
+	AccessError  error
 	ServerError  error
 }
 
@@ -36,6 +37,10 @@ type AppError struct {
 func (a AppError) Error() string {
 	if a.RequestError != nil {
 		return a.RequestError.Error()
+	}
+
+	if a.AccessError != nil {
+		return a.AccessError.Error()
 	}
 
 	if a.ServerError != nil {

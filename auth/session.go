@@ -25,7 +25,7 @@ THE SOFTWARE.
 package auth
 
 import (
-	"github.com/bit-fever/core/auth/roles"
+	"github.com/bit-fever/core/auth/role"
 	"time"
 )
 
@@ -39,12 +39,12 @@ type UserSession struct {
 	Email     string
 	IssuedAt  time.Time
 	Expiry    time.Time
-	Roles     map[roles.Role]any
+	Roles     map[role.Role]any
 }
 
 //=============================================================================
 
-func (us *UserSession) IsUserInRole(roles []roles.Role) bool {
+func (us *UserSession) IsUserInRole(roles []role.Role) bool {
 	for _, r := range roles {
 		if _, ok := us.Roles[r]; ok {
 			return true
