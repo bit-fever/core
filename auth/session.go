@@ -55,3 +55,10 @@ func (us *UserSession) IsUserInRole(roles []role.Role) bool {
 }
 
 //=============================================================================
+
+func (us *UserSession) IsAdmin() bool {
+	_, ok := us.Roles[role.Admin]
+	return ok
+}
+
+//=============================================================================
