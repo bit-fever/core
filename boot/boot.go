@@ -27,12 +27,11 @@ package boot
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
+	"github.com/bit-fever/core"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"io"
-	"io/ioutil"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -47,56 +46,57 @@ func ReadConfig(component string, config any) {
 	viper.AddConfigPath("config")
 
 	err := viper.ReadInConfig()
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	core.ExitIfError(err)
 
 	err = viper.Unmarshal(config)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	core.ExitIfError(err)
 }
 
 //=============================================================================
 
-func InitLogs(logFile string) *os.File {
-	log.SetFlags(log.Ldate | log.Ltime | log.LUTC | log.Lmicroseconds | log.Lshortfile)
+func InitLogger(logFile string, debug bool) (*os.File, *slog.Logger) {
+
+	//--- Create log file
 
 	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
+	core.ExitIfError(err)
 
 	wrt := io.MultiWriter(os.Stdout, f)
-	log.SetOutput(wrt)
+
+	//--- create logger
+
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+
+	if !debug {
+		opts = nil
+	}
+
+	logger := slog.New(slog.NewJSONHandler(wrt, opts))
+	slog.SetDefault(logger)
 	gin.DefaultWriter = wrt
 
-	return f
+	return f, logger
 }
 
 //=============================================================================
 
 func RunHttpServer(router *gin.Engine, bindAddress string) {
 
-	log.Println("Starting HTTPS server...")
+	slog.Info("Starting HTTPS server...")
 	rootCAs, err := x509.SystemCertPool()
-	if err != nil {
-		log.Fatal(err)
-	}
+	core.ExitIfError(err)
+
 	if rootCAs == nil {
 		rootCAs = x509.NewCertPool()
 	}
 
-	caCert, err := ioutil.ReadFile("config/ca.crt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	caCert, err := os.ReadFile("config/ca.crt")
+	core.ExitIfError(err)
 
 	if ok := rootCAs.AppendCertsFromPEM(caCert); !ok {
-		err := errors.New("failed to append CA cert to local certificate pool")
-		log.Fatal(err)
+		core.ExitWithMessage("Failed to append CA cert to local certificate pool")
 	}
 
 	tlsConfig := &tls.Config{
@@ -110,12 +110,9 @@ func RunHttpServer(router *gin.Engine, bindAddress string) {
 		Handler:   router,
 	}
 
-	log.Println("Running")
+	slog.Info("Running")
 	err = server.ListenAndServeTLS("config/server.crt", "config/server.key")
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	core.ExitIfError(err)
 }
 
 //=============================================================================

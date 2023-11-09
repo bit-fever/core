@@ -29,8 +29,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"github.com/bit-fever/core"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -47,13 +48,7 @@ var clientMap = map[string] *http.Client {}
 //=============================================================================
 
 func AddClient(id string, caCert string, clientCert string, clientKey string) {
-	client, err := createClient(caCert, clientCert, clientKey)
-
-	if err != nil {
-		log.Fatalf("Cannot create http client for '"+ id +"' : "+ err.Error())
-	}
-
-	clientMap[id] = client
+	clientMap[id] = createClient(caCert, clientCert, clientKey)
 }
 
 //=============================================================================
@@ -71,10 +66,10 @@ func DoGet(client *http.Client, url string, output any) error {
 
 //=============================================================================
 
-func DoPut(client *http.Client, url string, params any, output any) error {
+func DoPost(client *http.Client, url string, params any, output any) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
-		log.Printf("Error marshalling put parameter: %v", err)
+		slog.Error("Error marshalling POST parameter: %v", err)
 		return err
 	}
 
@@ -84,24 +79,56 @@ func DoPut(client *http.Client, url string, params any, output any) error {
 }
 
 //=============================================================================
+
+func DoPut(client *http.Client, url string, params any, output any) error {
+	body, err := json.Marshal(&params)
+	if err != nil {
+		slog.Error("Error marshalling PUT parameter: %v", err)
+		return err
+	}
+
+	reader := bytes.NewReader(body)
+
+	req, err := http.NewRequest("PUT", url, reader)
+	if err != nil {
+		slog.Error("Error creating a PUT request: %v", err)
+		return err
+	}
+	req.Header.Set("Content-Type", "Application/json")
+	res, err := client.Do(req)
+
+	return buildResponse(res, err, &output)
+}
+
+//=============================================================================
+
+func DoDelete(client *http.Client, url string, output any) error {
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		slog.Error("Error creating a DELETE request: %v", err)
+		return err
+	}
+
+	res, err := client.Do(req)
+
+	return buildResponse(res, err, &output)
+}
+
+//=============================================================================
 //===
 //=== Private methods
 //===
 //=============================================================================
 
-func createClient(caCert string, clientCert string, clientKey string) (*http.Client, error) {
+func createClient(caCert string, clientCert string, clientKey string) *http.Client {
 	cert, err := os.ReadFile("config/"+ caCert)
-	if err != nil {
-		return nil, err
-	}
+	core.ExitIfError(err)
 
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(cert)
 
 	certificate, err := tls.LoadX509KeyPair("config/"+ clientCert, "config/"+ clientKey)
-	if err != nil {
-		return nil, err
-	}
+	core.ExitIfError(err)
 
 	return &http.Client{
 		Timeout: time.Minute * 3,
@@ -111,19 +138,19 @@ func createClient(caCert string, clientCert string, clientKey string) (*http.Cli
 				Certificates: []tls.Certificate{certificate},
 			},
 		},
-	}, nil
+	}
 }
 
 //=============================================================================
 
 func buildResponse(res *http.Response, err error, output any) error {
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
+		slog.Error("Error sending request: %v", err)
 		return err
 	}
 
 	if res.StatusCode >= 400 {
-		log.Printf("Error from the server: %v", res.Status)
+		slog.Error("Error from the server: %v", res.Status)
 		return err
 	}
 
@@ -131,13 +158,13 @@ func buildResponse(res *http.Response, err error, output any) error {
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Printf("Error reading response: %v", err)
+		slog.Error("Error reading response: %v", err)
 		return err
 	}
 
 	err = json.Unmarshal(body, &output)
 	if err != nil {
-		log.Printf("Bad JSON response from server:\n%v", err)
+		slog.Error("Bad JSON response from server:\n%v", err)
 	}
 
 	return nil

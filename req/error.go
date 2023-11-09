@@ -28,7 +28,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 //=============================================================================
@@ -124,6 +126,13 @@ type errorResponse struct {
 //-----------------------------------------------------------------------------
 
 func writeError(c *gin.Context, errorCode int, errorMessage string, details any) {
+
+	slog.Error(errorMessage,
+		"client", c.ClientIP(),
+		"pid",  os.Getpid(),
+		"code", errorCode,
+		"data", details)
+
 	c.JSON(errorCode, &errorResponse{
 		Code:    errorCode,
 		Error:   errorMessage,

@@ -27,22 +27,27 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"github.com/bit-fever/core"
 	"github.com/bit-fever/core/auth/role"
 	"github.com/bit-fever/core/req"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 )
 
 //=============================================================================
 
 type OidcController struct {
+	module    string
 	authority string
 	client    *http.Client
 	context   *context.Context
 	verifier  *oidc.IDTokenVerifier
+	logger    *slog.Logger
+	config    any
 }
 
 //=============================================================================
@@ -66,12 +71,10 @@ type realmRoles struct {
 
 //=============================================================================
 
-func NewOidcController(authority string, client *http.Client) (*OidcController, error) {
+func NewOidcController(module string, authority string, client *http.Client, logger *slog.Logger, config any) *OidcController {
 	ccontext      := oidc.ClientContext(context.Background(), client)
 	provider, err := oidc.NewProvider(ccontext, authority)
-	if err != nil {
-		return nil, errors.New("Authorisation failed while getting the provider: "+ err.Error())
-	}
+	core.ExitIfError(err)
 
 	oidcConfig := &oidc.Config{
 		SkipClientIDCheck: true,
@@ -79,16 +82,19 @@ func NewOidcController(authority string, client *http.Client) (*OidcController, 
 	verifier := provider.Verifier(oidcConfig)
 
 	return &OidcController{
+		module   : module,
 		authority: authority,
 		client   : client,
 		context  : &ccontext,
 		verifier : verifier,
-	}, nil
+		logger   : logger,
+		config   : config,
+	}
 }
 
 //=============================================================================
 
-func (oc *OidcController) Secure(h func(c *gin.Context, us *UserSession), roles []role.Role) func(c *gin.Context) {
+func (oc *OidcController) Secure(h RestService, roles []role.Role) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		rawAccessToken := c.Request.Header.Get("Authorization")
 		tokens := strings.Split(rawAccessToken, " ")
@@ -112,12 +118,30 @@ func (oc *OidcController) Secure(h func(c *gin.Context, us *UserSession), roles 
 		us := buildUserSession(&ut, idToken)
 
 		if ! us.IsUserInRole(roles) {
-			req.ReturnForbiddenError(c, "User not allowed to access this API")
+			req.ReturnForbiddenError(c, "User not allowed to access this API: "+ us.Username)
 			return
 		}
 
-		h(c, us)
+		ctx := &Context{
+			Gin    : c,
+			Session: us,
+			Log    : oc.createLogger(us, c),
+			Config : oc.config,
+		}
+
+		h(ctx)
 	}
+}
+
+//=============================================================================
+
+func (oc *OidcController) createLogger(us *UserSession, c *gin.Context) *slog.Logger {
+	return oc.logger.With(
+		slog.String("client",   c.ClientIP()),
+		slog.String("module",   oc.module),
+		slog.Int   ("pid",      os.Getpid()),
+		slog.String("username", us.Username),
+	).WithGroup("data")
 }
 
 //=============================================================================
