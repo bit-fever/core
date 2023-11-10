@@ -119,13 +119,6 @@ func GetIdFromUrl(c *gin.Context) (uint, error) {
 
 //=============================================================================
 
-func ReturnObject(c *gin.Context, data any) error {
-	c.JSON(http.StatusOK, data)
-	return nil
-}
-
-//=============================================================================
-
 type listResponse struct {
 	Offset   int  `json:"offset"`
 	Limit    int  `json:"limit"`

@@ -25,9 +25,15 @@ THE SOFTWARE.
 package auth
 
 import (
+	"github.com/bit-fever/core/req"
 	"github.com/gin-gonic/gin"
 	"log/slog"
+	"net/http"
 )
+
+//=============================================================================
+
+type RestService func(c *Context)
 
 //=============================================================================
 
@@ -40,6 +46,51 @@ type Context struct {
 
 //=============================================================================
 
-type RestService func(c *Context)
+func (c *Context) ReturnError(err error) {
+	req.ReturnError(c.Gin, err)
+}
+
+//=============================================================================
+
+func (c *Context) ReturnList(result any, offset int, limit int, size int) error {
+	return req.ReturnList(c.Gin, result, offset, limit, size)
+}
+
+//=============================================================================
+
+func (c *Context) GetPagingParams() (offset int, limit int, errV error) {
+	return req.GetPagingParams(c.Gin)
+}
+
+//=============================================================================
+
+func (c *Context) BindParamsFromQuery(obj any) (err error) {
+	return req.BindParamsFromQuery(c.Gin, obj)
+}
+
+//=============================================================================
+
+func (c *Context) BindParamsFromBody(obj any) (err error) {
+	return req.BindParamsFromBody(c.Gin, obj)
+}
+
+//=============================================================================
+
+func (c *Context) GetIdFromUrl() (uint, error) {
+	return req.GetIdFromUrl(c.Gin)
+}
+
+//=============================================================================
+
+func (c *Context) GetCodeFromUrl() string {
+	return c.Gin.Param("code")
+}
+
+//=============================================================================
+
+func (c *Context) ReturnObject(data any) error {
+	c.Gin.JSON(http.StatusOK, data)
+	return nil
+}
 
 //=============================================================================
