@@ -42,16 +42,16 @@ import (
 //===
 //=============================================================================
 
-func InitApplication(component string, config *core.Config) *slog.Logger {
+func InitApplication(component string, config any) *slog.Logger {
 	readConfig(component, config)
 
 	logFile := "config/"+ component +".log"
-	return initLogger(component, logFile, config)
+	return initLogger(component, logFile, config.(*core.Config))
 }
 
 //=============================================================================
 
-func RunHttpServer(router *gin.Engine, config *core.Config) {
+func RunHttpServer(router *gin.Engine, config any) {
 
 	slog.Info("Starting HTTPS server...")
 	rootCAs, err := x509.SystemCertPool()
@@ -74,7 +74,7 @@ func RunHttpServer(router *gin.Engine, config *core.Config) {
 	}
 
 	server := &http.Server{
-		Addr:      config.Application.BindAddress,
+		Addr:      config.(*core.Config).Application.BindAddress,
 		TLSConfig: tlsConfig,
 		Handler:   router,
 	}
@@ -90,7 +90,7 @@ func RunHttpServer(router *gin.Engine, config *core.Config) {
 //===
 //=============================================================================
 
-func readConfig(component string, config *core.Config) {
+func readConfig(component string, config any) {
 	viper.SetConfigName(component)
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/bit-fever/")
