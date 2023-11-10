@@ -40,7 +40,6 @@ import (
 //=============================================================================
 
 type OidcController struct {
-	module    string
 	authority string
 	client    *http.Client
 	context   *context.Context
@@ -70,7 +69,7 @@ type realmRoles struct {
 
 //=============================================================================
 
-func NewOidcController(module string, authority string, client *http.Client, logger *slog.Logger, config any) *OidcController {
+func NewOidcController(authority string, client *http.Client, logger *slog.Logger, config any) *OidcController {
 	ccontext      := oidc.ClientContext(context.Background(), client)
 	provider, err := oidc.NewProvider(ccontext, authority)
 	core.ExitIfError(err)
@@ -81,7 +80,6 @@ func NewOidcController(module string, authority string, client *http.Client, log
 	verifier := provider.Verifier(oidcConfig)
 
 	return &OidcController{
-		module   : module,
 		authority: authority,
 		client   : client,
 		context  : &ccontext,
