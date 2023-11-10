@@ -37,52 +37,21 @@ import (
 )
 
 //=============================================================================
+//===
+//=== Public functions
+//===
+//=============================================================================
 
-func ReadConfig(component string, config any) {
-	viper.SetConfigName(component)
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/etc/bit-fever/")
-	viper.AddConfigPath("$HOME/.bit-fever/"+component)
-	viper.AddConfigPath("config")
+func InitApplication(component string, config *core.Config) *slog.Logger {
+	readConfig(component, config)
 
-	err := viper.ReadInConfig()
-	core.ExitIfError(err)
-
-	err = viper.Unmarshal(config)
-	core.ExitIfError(err)
+	logFile := "config/"+ component +".log"
+	return initLogger(component, logFile, config)
 }
 
 //=============================================================================
 
-func InitLogger(logFile string, debug bool) (*os.File, *slog.Logger) {
-
-	//--- Create log file
-
-	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	core.ExitIfError(err)
-
-	wrt := io.MultiWriter(os.Stdout, f)
-
-	//--- create logger
-
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}
-
-	if !debug {
-		opts = nil
-	}
-
-	logger := slog.New(slog.NewJSONHandler(wrt, opts))
-	slog.SetDefault(logger)
-	gin.DefaultWriter = wrt
-
-	return f, logger
-}
-
-//=============================================================================
-
-func RunHttpServer(router *gin.Engine, bindAddress string) {
+func RunHttpServer(router *gin.Engine, config *core.Config) {
 
 	slog.Info("Starting HTTPS server...")
 	rootCAs, err := x509.SystemCertPool()
@@ -105,7 +74,7 @@ func RunHttpServer(router *gin.Engine, bindAddress string) {
 	}
 
 	server := &http.Server{
-		Addr:      bindAddress,
+		Addr:      config.Application.BindAddress,
 		TLSConfig: tlsConfig,
 		Handler:   router,
 	}
@@ -113,6 +82,62 @@ func RunHttpServer(router *gin.Engine, bindAddress string) {
 	slog.Info("Running")
 	err = server.ListenAndServeTLS("config/server.crt", "config/server.key")
 	core.ExitIfError(err)
+}
+
+//=============================================================================
+//===
+//=== Private functions
+//===
+//=============================================================================
+
+func readConfig(component string, config *core.Config) {
+	viper.SetConfigName(component)
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/etc/bit-fever/")
+	viper.AddConfigPath("$HOME/.bit-fever/"+component)
+	viper.AddConfigPath("config")
+
+	err := viper.ReadInConfig()
+	core.ExitIfError(err)
+
+	err = viper.Unmarshal(config)
+	core.ExitIfError(err)
+}
+
+//=============================================================================
+
+func initLogger(component string, logFile string, config *core.Config) *slog.Logger {
+
+	//--- Create log file
+
+	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	core.ExitIfError(err)
+
+	var wrt io.Writer = f
+
+	if ! config.Application.Production {
+		wrt = io.MultiWriter(os.Stdout, f)
+	}
+
+	//--- create logger
+
+	opts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+
+	if !config.Application.Debug {
+		opts = nil
+	}
+
+	logger := slog.New(slog.NewJSONHandler(wrt, opts)).With(
+		slog.String("component", component),
+		slog.Int   ("pid",       os.Getpid()),
+	)
+
+	slog.SetDefault(logger)
+	gin.DefaultWriter = wrt
+
+	return logger
 }
 
 //=============================================================================

@@ -34,7 +34,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -138,8 +137,6 @@ func (oc *OidcController) Secure(h RestService, roles []role.Role) func(c *gin.C
 func (oc *OidcController) createLogger(us *UserSession, c *gin.Context) *slog.Logger {
 	return oc.logger.With(
 		slog.String("client",   c.ClientIP()),
-		slog.String("module",   oc.module),
-		slog.Int   ("pid",      os.Getpid()),
 		slog.String("username", us.Username),
 	).WithGroup("data")
 }

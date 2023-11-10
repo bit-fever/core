@@ -31,6 +31,33 @@ import (
 
 //=============================================================================
 
+type Config struct {
+	Application struct {
+		BindAddress string
+		Production  bool
+		Debug       bool
+	}
+
+	Database struct {
+		Address  string
+		Name     string
+		Username string
+		Password string
+	}
+
+	Authentication struct {
+		Authority    string
+		ClientId     string
+		ClientSecret string
+	}
+
+	Platform struct {
+		System string
+	}
+}
+
+//=============================================================================
+
 func ExitIfError(err error) {
 	if err != nil {
 		ExitWithMessage(err.Error())
