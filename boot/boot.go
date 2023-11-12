@@ -97,13 +97,13 @@ func InitLogger(component string, app *core.Application) *slog.Logger {
 //=============================================================================
 
 func InitEngine(logger *slog.Logger, app *core.Application) *gin.Engine {
-	if app.Production {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	engine := gin.New()
 	engine.Use(sloggin.New(logger))
 	engine.Use(gin.Recovery())
+
+	if app.Production {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	return engine
 }
