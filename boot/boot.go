@@ -34,6 +34,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	sloggin "github.com/samber/slog-gin"
 )
 
 //=============================================================================
@@ -62,7 +63,7 @@ func InitLogger(component string, app *core.Application) *slog.Logger {
 
 	//--- Create log file
 
-	logFile := "config/"+ component +".log"
+	logFile := "log/"+ component +".log"
 
 	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	core.ExitIfError(err)
@@ -89,9 +90,22 @@ func InitLogger(component string, app *core.Application) *slog.Logger {
 	)
 
 	slog.SetDefault(logger)
-	gin.DefaultWriter = wrt
 
 	return logger
+}
+
+//=============================================================================
+
+func InitEngine(logger *slog.Logger, app *core.Application) *gin.Engine {
+	if app.Production {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	engine := gin.New()
+	engine.Use(sloggin.New(logger))
+	engine.Use(gin.Recovery())
+
+	return engine
 }
 
 //=============================================================================
