@@ -31,29 +31,35 @@ import (
 
 //=============================================================================
 
-type Config struct {
-	Application struct {
-		BindAddress string
-		Production  bool
-		Debug       bool
-	}
+type Application struct {
+	BindAddress string
+	Production  bool
+	Debug       bool
+}
 
-	Database struct {
-		Address  string
-		Name     string
-		Username string
-		Password string
-	}
+//=============================================================================
 
-	Authentication struct {
-		Authority    string
-		ClientId     string
-		ClientSecret string
-	}
+type Database struct {
+	Address  string
+	Name     string
+	Username string
+	Password string
+}
 
-	Platform struct {
-		System string
-	}
+//=============================================================================
+
+type Authentication struct {
+	Authority    string
+	ClientId     string
+	ClientSecret string
+}
+
+//=============================================================================
+
+type Platform struct {
+	System    string
+	Inventory string
+	Data      string
 }
 
 //=============================================================================
