@@ -47,39 +47,61 @@ const MaxQueryLimit = 5000
 
 func GetPagingParams(c *gin.Context) (offset int, limit int, errV error) {
 
-	params := c.Request.URL.Query()
+	offset, err1 := GetParamAsInt(c, "offset", 0)
 
-	//--- Extract offset
-
-	if !params.Has("offset") {
-		offset = 0
-	} else {
-		offsetP := params.Get("offset")
-		offsetV, err := strconv.ParseInt(offsetP, 10, 64)
-
-		if err != nil || offsetV < 0 {
-			return 0, 0, NewRequestError("Invalid 'offset' param: %v", offsetP)
-		}
-
-		offset = int(offsetV)
+	if err1 != nil || offset < 0 {
+		return 0, 0, NewRequestError("Invalid 'offset' param: %v", offset)
 	}
 
 	//--- Extract limit
 
-	if !params.Has("limit") {
-		limit = MaxQueryLimit
-	} else {
-		limitP := params.Get("limit")
-		limitV, err := strconv.ParseInt(limitP, 10, 32)
+	limit, err2 := GetParamAsInt(c, "limit", MaxQueryLimit)
 
-		if err != nil || limitV < 1 || limit > MaxQueryLimit {
-			return 0, 0, NewRequestError("Invalid 'limit' param: %v", limitP)
+	if err2 != nil || limit < 1 || limit > MaxQueryLimit {
+			return 0, 0, NewRequestError("Invalid 'limit' param: %v", limit)
 		}
 
-		limit = int(limitV)
+	return offset, limit, nil
+}
+
+//=============================================================================
+
+func GetParamAsBool(c *gin.Context, name string, defValue bool) (bool, error) {
+	params := c.Request.URL.Query()
+
+	if ! params.Has(name) {
+		return defValue, nil
 	}
 
-	return offset, limit, nil
+	value := params.Get(name)
+
+	res, err := strconv.ParseBool(value)
+
+	if err == nil {
+		return res, nil
+	}
+
+	return false, NewRequestError("Parameter '%v' has not a boolean value: %v", name, value)
+}
+
+//=============================================================================
+
+func GetParamAsInt(c *gin.Context, name string, defValue int) (int, error) {
+	params := c.Request.URL.Query()
+
+	if ! params.Has(name) {
+		return defValue, nil
+	}
+
+	value := params.Get(name)
+
+	res, err := strconv.ParseInt(value, 10, 32)
+
+	if err == nil {
+		return int(res), nil
+	}
+
+	return 0, NewRequestError("Parameter '%v' has not an integer value: %v", name, value)
 }
 
 //=============================================================================

@@ -34,35 +34,51 @@ import (
 
 //=============================================================================
 
-func NewRequestError(message string, params ...any) error {
-	msg := fmt.Sprintf(message, params)
-	err := AppError{
-		RequestError: errors.New(msg),
-	}
+type AppError struct {
+	Code  int
+	Message string
+}
 
-	return err
+//-----------------------------------------------------------------------------
+
+func (e AppError) Error() string {
+	return e.Message
 }
 
 //=============================================================================
 
-func NewAccessError(message string, params ...any) error {
-	msg := fmt.Sprintf(message, params)
-	err := AppError{
-		AccessError: errors.New(msg),
+func NewBadRequestError(message string, params ...any) error {
+	return AppError {
+		Code:    http.StatusBadRequest,
+		Message: fmt.Sprintf(message, params),
 	}
+}
 
-	return err
+//=============================================================================
+
+func NewForbiddenError(message string, params ...any) error {
+	return AppError {
+		Code:    http.StatusForbidden,
+		Message: fmt.Sprintf(message, params),
+	}
+}
+
+//=============================================================================
+
+func NewNotFoundError(message string, params ...any) error {
+	return AppError {
+		Code:    http.StatusNotFound,
+		Message: fmt.Sprintf(message, params),
+	}
 }
 
 //=============================================================================
 
 func NewServerError(message string, params ...any) error {
-	msg := fmt.Sprintf(message, params)
-	err := AppError{
-		ServerError: errors.New(msg),
+	return AppError {
+		Code:    http.StatusInternalServerError,
+		Message: fmt.Sprintf(message, params),
 	}
-
-	return err
 }
 
 //=============================================================================
@@ -73,8 +89,21 @@ func NewServerErrorByError(err error) error {
 	}
 
 	return AppError{
-		ServerError: err,
+		Code:    http.StatusInternalServerError,
+		Message: err.Error(),
 	}
+}
+
+//=============================================================================
+
+func ReturnUnauthorizedError(c *gin.Context, message string) {
+	writeError(c, http.StatusUnauthorized, message)
+}
+
+//=============================================================================
+
+func ReturnForbiddenError(c *gin.Context, message string) {
+	writeError(c, http.StatusForbidden, message)
 }
 
 //=============================================================================
@@ -83,31 +112,11 @@ func ReturnError(c *gin.Context, err error) {
 	if err != nil {
 		var ae AppError
 		if errors.As(err, &ae) {
-			if ae.RequestError != nil {
-				writeError(c, http.StatusBadRequest, err.Error(), nil)
-			} else if ae.AccessError != nil {
-				writeError(c, http.StatusForbidden, err.Error(), nil)
-			} else if ae.ServerError != nil {
-				writeError(c, http.StatusInternalServerError, err.Error(), nil)
-			} else {
-				writeError(c, http.StatusInternalServerError, "Bad AppError object", nil)
-			}
+			writeError(c, ae.Code, ae.Message)
 		} else {
-			writeError(c, http.StatusInternalServerError, "Found non AppError object : "+ err.Error(), nil)
+			writeError(c, http.StatusInternalServerError, "Found non AppError object : "+ err.Error())
 		}
 	}
-}
-
-//=============================================================================
-
-func ReturnUnauthorizedError(c *gin.Context, message string) {
-	writeError(c, http.StatusUnauthorized, message, nil)
-}
-
-//=============================================================================
-
-func ReturnForbiddenError(c *gin.Context, message string) {
-	writeError(c, http.StatusForbidden, message, nil)
 }
 
 //=============================================================================
@@ -119,22 +128,19 @@ func ReturnForbiddenError(c *gin.Context, message string) {
 type errorResponse struct {
 	Code    int    `json:"code"`
 	Error   string `json:"error"`
-	Details any    `json:"details,omitempty"`
 }
 
 //-----------------------------------------------------------------------------
 
-func writeError(c *gin.Context, errorCode int, errorMessage string, details any) {
+func writeError(c *gin.Context, errorCode int, errorMessage string) {
 
 	slog.Error(errorMessage,
 		"client", c.ClientIP(),
-		"code", errorCode,
-		"data", details)
+		"code", errorCode)
 
 	c.JSON(errorCode, &errorResponse{
 		Code:    errorCode,
 		Error:   errorMessage,
-		Details: details,
 	})
 }
 
