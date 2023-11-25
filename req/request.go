@@ -50,7 +50,7 @@ func GetPagingParams(c *gin.Context) (offset int, limit int, errV error) {
 	offset, err1 := GetParamAsInt(c, "offset", 0)
 
 	if err1 != nil || offset < 0 {
-		return 0, 0, NewRequestError("Invalid 'offset' param: %v", offset)
+		return 0, 0, NewBadRequestError("Invalid 'offset' param: %v", offset)
 	}
 
 	//--- Extract limit
@@ -58,7 +58,7 @@ func GetPagingParams(c *gin.Context) (offset int, limit int, errV error) {
 	limit, err2 := GetParamAsInt(c, "limit", MaxQueryLimit)
 
 	if err2 != nil || limit < 1 || limit > MaxQueryLimit {
-			return 0, 0, NewRequestError("Invalid 'limit' param: %v", limit)
+			return 0, 0, NewBadRequestError("Invalid 'limit' param: %v", limit)
 		}
 
 	return offset, limit, nil
@@ -81,7 +81,7 @@ func GetParamAsBool(c *gin.Context, name string, defValue bool) (bool, error) {
 		return res, nil
 	}
 
-	return false, NewRequestError("Parameter '%v' has not a boolean value: %v", name, value)
+	return false, NewBadRequestError("Parameter '%v' has not a boolean value: %v", name, value)
 }
 
 //=============================================================================
@@ -101,7 +101,7 @@ func GetParamAsInt(c *gin.Context, name string, defValue int) (int, error) {
 		return int(res), nil
 	}
 
-	return 0, NewRequestError("Parameter '%v' has not an integer value: %v", name, value)
+	return 0, NewBadRequestError("Parameter '%v' has not an integer value: %v", name, value)
 }
 
 //=============================================================================
@@ -109,7 +109,7 @@ func GetParamAsInt(c *gin.Context, name string, defValue int) (int, error) {
 func BindParamsFromQuery(c *gin.Context, obj any) (err error) {
 	if err := c.ShouldBindQuery(obj); err != nil {
 		message := parseError(err)
-		return NewRequestError(message, nil)
+		return NewBadRequestError(message, nil)
 	}
 
 	return nil
@@ -120,7 +120,7 @@ func BindParamsFromQuery(c *gin.Context, obj any) (err error) {
 func BindParamsFromBody(c *gin.Context, obj any) (err error) {
 	if err := c.ShouldBind(obj); err != nil {
 		message := parseError(err)
-		return NewRequestError(message, nil)
+		return NewBadRequestError(message, nil)
 	}
 
 	return nil
@@ -133,7 +133,7 @@ func GetIdFromUrl(c *gin.Context) (uint, error) {
 	iId, err := strconv.ParseInt(sId, 10, 64)
 
 	if err != nil || iId<0 {
-		return 0, NewRequestError("Invalid ID in url: %v", sId)
+		return 0, NewBadRequestError("Invalid ID in url: %v", sId)
 	}
 
 	return uint(iId), nil
