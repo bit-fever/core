@@ -64,6 +64,18 @@ func (c *Context) GetPagingParams() (offset int, limit int, errV error) {
 
 //=============================================================================
 
+func (c *Context) GetParamAsBool(name string, defValue bool) (bool, error) {
+	return req.GetParamAsBool(c.Gin, name, defValue)
+}
+
+//=============================================================================
+
+func (c *Context) GetParamAsInt(name string, defValue int) (int, error) {
+	return req.GetParamAsInt(c.Gin, name, defValue)
+}
+
+//=============================================================================
+
 func (c *Context) BindParamsFromQuery(obj any) (err error) {
 	return req.BindParamsFromQuery(c.Gin, obj)
 }
