@@ -29,6 +29,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"github.com/bit-fever/core"
 	"io"
 	"log/slog"
@@ -69,7 +70,7 @@ func DoGet(client *http.Client, url string, output any) error {
 func DoPost(client *http.Client, url string, params any, output any) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
-		slog.Error("Error marshalling POST parameter: %v", err)
+		slog.Error("Error marshalling POST parameter", "error", err.Error())
 		return err
 	}
 
@@ -83,7 +84,7 @@ func DoPost(client *http.Client, url string, params any, output any) error {
 func DoPut(client *http.Client, url string, params any, output any) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
-		slog.Error("Error marshalling PUT parameter: %v", err)
+		slog.Error("Error marshalling PUT parameter", "error", err.Error())
 		return err
 	}
 
@@ -91,7 +92,7 @@ func DoPut(client *http.Client, url string, params any, output any) error {
 
 	req, err := http.NewRequest("PUT", url, reader)
 	if err != nil {
-		slog.Error("Error creating a PUT request: %v", err)
+		slog.Error("Error creating a PUT request", "error", err.Error())
 		return err
 	}
 	req.Header.Set("Content-Type", "Application/json")
@@ -105,7 +106,7 @@ func DoPut(client *http.Client, url string, params any, output any) error {
 func DoDelete(client *http.Client, url string, output any) error {
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		slog.Error("Error creating a DELETE request: %v", err)
+		slog.Error("Error creating a DELETE request", "error", err.Error())
 		return err
 	}
 
@@ -145,26 +146,26 @@ func createClient(caCert string, clientCert string, clientKey string) *http.Clie
 
 func buildResponse(res *http.Response, err error, output any) error {
 	if err != nil {
-		slog.Error("Error sending request: %v", err)
+		slog.Error("Error sending request", "error", err.Error())
 		return err
 	}
 
 	if res.StatusCode >= 400 {
-		slog.Error("Error from the server: %v", res.Status)
-		return err
+		slog.Error("Error from the server", "error", res.Status)
+		return errors.New("Not found")
 	}
 
 	//--- Read the response body
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		slog.Error("Error reading response: %v", err)
+		slog.Error("Error reading response", "error", err.Error())
 		return err
 	}
 
 	err = json.Unmarshal(body, &output)
 	if err != nil {
-		slog.Error("Bad JSON response from server:\n%v", err)
+		slog.Error("Bad JSON response from server", "error", err.Error())
 	}
 
 	return nil
