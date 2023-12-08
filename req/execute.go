@@ -150,9 +150,19 @@ func buildResponse(res *http.Response, err error, output any) error {
 		return err
 	}
 
-	if res.StatusCode >= 400 {
+	if res.StatusCode == 401 {
+		slog.Error("Error from the server", "error", res.Status)
+		return errors.New("Authorization failed")
+	}
+
+	if res.StatusCode == 404 {
 		slog.Error("Error from the server", "error", res.Status)
 		return errors.New("Not found")
+	}
+
+	if res.StatusCode >= 400 {
+		slog.Error("Error from the server", "error", res.Status)
+		return errors.New("Client error: "+ res.Status)
 	}
 
 	//--- Read the response body
