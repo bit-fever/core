@@ -60,14 +60,23 @@ func GetClient(id string) *http.Client {
 
 //=============================================================================
 
-func DoGet(client *http.Client, url string, output any) error {
-	res, err := client.Get(url)
+func DoGet(client *http.Client, url string, output any, token string) error {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+ token)
+	}
+
+	res, err := client.Do(req)
 	return buildResponse(res, err, &output)
 }
 
 //=============================================================================
 
-func DoPost(client *http.Client, url string, params any, output any) error {
+func DoPost(client *http.Client, url string, params any, output any, token string) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
 		slog.Error("Error marshalling POST parameter", "error", err.Error())
@@ -75,13 +84,24 @@ func DoPost(client *http.Client, url string, params any, output any) error {
 	}
 
 	reader := bytes.NewReader(body)
-	res, err := client.Post(url, "Application/json", reader)
+
+	req, err := http.NewRequest("POST", url, reader)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "Application/json")
+
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+ token)
+	}
+
+	res, err := client.Do(req)
 	return buildResponse(res, err, &output)
 }
 
 //=============================================================================
 
-func DoPut(client *http.Client, url string, params any, output any) error {
+func DoPut(client *http.Client, url string, params any, output any, token string) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
 		slog.Error("Error marshalling PUT parameter", "error", err.Error())
@@ -92,26 +112,32 @@ func DoPut(client *http.Client, url string, params any, output any) error {
 
 	req, err := http.NewRequest("PUT", url, reader)
 	if err != nil {
-		slog.Error("Error creating a PUT request", "error", err.Error())
 		return err
 	}
 	req.Header.Set("Content-Type", "Application/json")
-	res, err := client.Do(req)
 
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+ token)
+	}
+
+	res, err := client.Do(req)
 	return buildResponse(res, err, &output)
 }
 
 //=============================================================================
 
-func DoDelete(client *http.Client, url string, output any) error {
+func DoDelete(client *http.Client, url string, output any, token string) error {
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		slog.Error("Error creating a DELETE request", "error", err.Error())
 		return err
 	}
 
-	res, err := client.Do(req)
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+ token)
+	}
 
+	res, err := client.Do(req)
 	return buildResponse(res, err, &output)
 }
 
