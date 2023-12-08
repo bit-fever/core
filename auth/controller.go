@@ -120,10 +120,11 @@ func (oc *OidcController) Secure(h RestService, roles []role.Role) func(c *gin.C
 		}
 
 		ctx := &Context{
-			Gin    : c,
-			Session: us,
-			Log    : oc.createLogger(us, c),
-			Config : oc.config,
+			Gin     : c,
+			Session : us,
+			Log     : oc.createLogger(us, c),
+			Config  : oc.config,
+			RawToken: rawAccessToken,
 		}
 
 		h(ctx)
