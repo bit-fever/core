@@ -38,11 +38,11 @@ type RestService func(c *Context)
 //=============================================================================
 
 type Context struct {
-	Gin      *gin.Context
-	Session  *UserSession
-	Log      *slog.Logger
-	Config   any
-	RawToken string
+	Gin     *gin.Context
+	Session *UserSession
+	Log     *slog.Logger
+	Config  any
+	Token   string
 }
 
 //=============================================================================
