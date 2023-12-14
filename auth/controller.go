@@ -58,13 +58,7 @@ type userToken struct {
 	Username string `json:"preferred_username,omitempty"`
 	Email    string `json:"email,omitempty"`
 
-	ResourceAccess map[string]json.RawMessage `json:"resource_access,omitempty"`
-}
-
-//-----------------------------------------------------------------------------
-
-type realmRoles struct {
-	Roles []role.Role `json:"roles,omitempty"`
+	RealmAccess map[string]json.RawMessage `json:"realm_access,omitempty"`
 }
 
 //=============================================================================
@@ -164,14 +158,14 @@ func buildUserSession(ut *userToken, it *oidc.IDToken) *UserSession {
 func buildRoleMap(ut *userToken) map[role.Role]any {
 	userRoles := map[role.Role]any{}
 
-	for k,v := range ut.ResourceAccess {
-		if k != "account" {
-			realmRoles := realmRoles{}
+	for k,v := range ut.RealmAccess {
+		if k == "roles" {
+			var realmRoles []string
 			err := json.Unmarshal(v, &realmRoles)
 
 			if err == nil {
-				for _, r := range realmRoles.Roles {
-					userRoles[r] = nil
+				for _, r := range realmRoles {
+					userRoles[role.Role(r)] = nil
 				}
 			}
 		}
