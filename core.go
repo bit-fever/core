@@ -64,6 +64,14 @@ type Platform struct {
 
 //=============================================================================
 
+type Messaging struct {
+	Address  string
+	Username string
+	Password string
+}
+
+//=============================================================================
+
 func ExitIfError(err error) {
 	if err != nil {
 		ExitWithMessage(err.Error())

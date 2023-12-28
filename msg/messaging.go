@@ -42,10 +42,12 @@ var channel *amqp.Channel
 
 //=============================================================================
 
-func InitMessaging(cfg *core.Database) {
+func InitMessaging(cfg *core.Messaging) {
 
 	slog.Info("Starting messaging...")
-	conn, err := amqp.Dial("amqp://rabbit-admin:rabbit.admin@localhost:8450/")
+	url := "amqp://"+ cfg.Username + ":" + cfg.Password + "@" + cfg.Address + "/"
+
+	conn, err := amqp.Dial(url)
 	if err != nil {
 		core.ExitWithMessage("Failed to connect to the messaging system: "+ err.Error())
 	}
