@@ -6,6 +6,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.7.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.15.5
+	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/samber/slog-gin v1.6.0
 	github.com/spf13/viper v1.17.0
 )
