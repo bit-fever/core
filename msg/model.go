@@ -36,7 +36,12 @@ const (
 	TypeActivate   = 4
 	TypeDeactivate = 5
 
-	SourceTradingSystem = "trading-system"
+	SourceTradingSystem  = "trading-system"
+	SourceProductData    = "product-data"
+	SourceProductBroker  = "product-broker"
+	SourceConnection     = "connection"
+	SourcePortfolio      = "portfolio"
+	SourceTradingSession = "trading-session"
 )
 
 //=============================================================================
