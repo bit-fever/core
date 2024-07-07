@@ -106,6 +106,24 @@ func GetParamAsInt(c *gin.Context, name string, defValue int) (int, error) {
 
 //=============================================================================
 
+func GetParamAsString(c *gin.Context, name string, defValue string) string {
+	params := c.Request.URL.Query()
+
+	if ! params.Has(name) {
+		return defValue
+	}
+
+	value := params.Get(name)
+
+	if value == "" {
+		return defValue
+	}
+
+	return value
+}
+
+//=============================================================================
+
 func BindParamsFromQuery(c *gin.Context, obj any) (err error) {
 	if err := c.ShouldBindQuery(obj); err != nil {
 		message := parseError(err)

@@ -77,6 +77,12 @@ func (c *Context) GetParamAsInt(name string, defValue int) (int, error) {
 
 //=============================================================================
 
+func (c *Context) GetParamAsString(name string, defValue string) string {
+	return req.GetParamAsString(c.Gin, name, defValue)
+}
+
+//=============================================================================
+
 func (c *Context) BindParamsFromQuery(obj any) (err error) {
 	return req.BindParamsFromQuery(c.Gin, obj)
 }
