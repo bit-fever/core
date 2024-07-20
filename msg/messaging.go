@@ -39,6 +39,9 @@ const ExInventoryUpdates            = "bf.inventory.updates"
 const QuInventoryUpdatesToPortfolio = "bf.inventory.updates:portfolio"
 const QuInventoryUpdatesToCollector = "bf.inventory.updates:collector"
 
+const ExCollectorUpload             = "bf.collector.upload"
+const QuCollectorUploadToIngester   = "bf.collector.upload:ingester"
+
 var channel *amqp.Channel
 
 //=============================================================================
@@ -61,12 +64,14 @@ func InitMessaging(cfg *core.Messaging) {
 	channel = ch
 
 	createExchange(ExInventoryUpdates)
-
 	createQueue(QuInventoryUpdatesToPortfolio)
 	bindQueue  (ExInventoryUpdates, QuInventoryUpdatesToPortfolio)
-
 	createQueue(QuInventoryUpdatesToCollector)
 	bindQueue  (ExInventoryUpdates, QuInventoryUpdatesToCollector)
+
+	createExchange(ExCollectorUpload)
+	createQueue(QuCollectorUploadToIngester)
+	bindQueue(ExCollectorUpload, QuCollectorUploadToIngester)
 }
 
 //=============================================================================

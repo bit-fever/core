@@ -29,12 +29,16 @@ package msg
 const (
 	OriginDb         = 1
 	OriginConnection = 2
+	OriginUpload     = 3
 
 	TypeCreate     = 1
 	TypeUpdate     = 2
 	TypeDelete     = 3
 	TypeActivate   = 4
 	TypeDeactivate = 5
+	TypeNewJob     = 6
+
+	//--- Inventory server
 
 	SourceTradingSystem  = "trading-system"
 	SourceProductData    = "product-data"
@@ -42,6 +46,10 @@ const (
 	SourceConnection     = "connection"
 	SourcePortfolio      = "portfolio"
 	SourceTradingSession = "trading-session"
+
+	//--- Data Collector
+
+	SourceUploadJob      = "upload-job"
 )
 
 //=============================================================================
