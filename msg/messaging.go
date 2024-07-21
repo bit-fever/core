@@ -93,7 +93,7 @@ func PublishToExchange(exchange string, message any) error {
 		})
 
 	if err != nil {
-		core.ExitWithMessage("Cannot publish to exchange '"+ exchange +"' : "+ err.Error())
+		slog.Error("Cannot publish a message to exchange", "exchange", exchange, "error", err.Error())
 	}
 
 	return err
