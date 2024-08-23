@@ -41,8 +41,8 @@ const (
 	//--- Inventory server
 
 	SourceTradingSystem  = "trading-system"
-	SourceProductData    = "product-data"
-	SourceProductBroker  = "product-broker"
+	SourceDataProduct    = "data-product"
+	SourceBrokerProduct  = "broker-product"
 	SourceConnection     = "connection"
 	SourcePortfolio      = "portfolio"
 	SourceTradingSession = "trading-session"
