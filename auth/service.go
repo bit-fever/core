@@ -101,6 +101,12 @@ func (c *Context) GetIdFromUrl() (uint, error) {
 
 //=============================================================================
 
+func (c *Context) GetId2FromUrl() (uint, error) {
+	return req.GetId2FromUrl(c.Gin)
+}
+
+//=============================================================================
+
 func (c *Context) GetCodeFromUrl() string {
 	return c.Gin.Param("code")
 }

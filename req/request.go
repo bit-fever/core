@@ -159,6 +159,19 @@ func GetIdFromUrl(c *gin.Context) (uint, error) {
 
 //=============================================================================
 
+func GetId2FromUrl(c *gin.Context) (uint, error) {
+	sId := c.Param("id2")
+	iId, err := strconv.ParseInt(sId, 10, 64)
+
+	if err != nil || iId<0 {
+		return 0, NewBadRequestError("Invalid ID in url: %v", sId)
+	}
+
+	return uint(iId), nil
+}
+
+//=============================================================================
+
 type listResponse struct {
 	Offset   int  `json:"offset"`
 	Limit    int  `json:"limit"`
