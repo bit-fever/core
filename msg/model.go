@@ -27,10 +27,6 @@ package msg
 //=============================================================================
 
 const (
-	OriginDb         = 1
-	OriginConnection = 2
-	OriginUpload     = 3
-
 	TypeCreate     = 1
 	TypeUpdate     = 2
 	TypeDelete     = 3
@@ -50,14 +46,17 @@ const (
 	//--- Data Collector
 
 	SourceUploadJob      = "upload-job"
+
+	//--- Runtime system
+
+	SourceTrade          = "trade"
 )
 
 //=============================================================================
 
 type Message struct {
-	Origin int
-	Type   int
 	Source string
+	Type   int
 	Entity []byte
 }
 

@@ -35,12 +35,15 @@ import (
 
 //=============================================================================
 
-const ExInventoryUpdates            = "bf.inventory.updates"
-const QuInventoryUpdatesToPortfolio = "bf.inventory.updates:portfolio"
-const QuInventoryUpdatesToCollector = "bf.inventory.updates:collector"
+const ExInventory            = "bf.inventory"
+const QuInventoryToPortfolio = "bf.inventory:portfolio"
+const QuInventoryToCollector = "bf.inventory:collector"
 
-const ExCollectorUpload             = "bf.collector.upload"
-const QuCollectorUploadToIngester   = "bf.collector.upload:ingester"
+const ExCollector            = "bf.collector"
+const QuCollectorToIngester  = "bf.collector:ingester"
+
+const ExRuntime              = "bf.runtime"
+const QuRuntimeToPortfolio   = "bf.runtime:portfolio"
 
 var channel *amqp.Channel
 
@@ -63,15 +66,19 @@ func InitMessaging(cfg *core.Messaging) {
 
 	channel = ch
 
-	createExchange(ExInventoryUpdates)
-	createQueue(QuInventoryUpdatesToPortfolio)
-	bindQueue  (ExInventoryUpdates, QuInventoryUpdatesToPortfolio)
-	createQueue(QuInventoryUpdatesToCollector)
-	bindQueue  (ExInventoryUpdates, QuInventoryUpdatesToCollector)
+	createExchange(ExInventory)
+	createQueue(QuInventoryToPortfolio)
+	bindQueue  (ExInventory, QuInventoryToPortfolio)
+	createQueue(QuInventoryToCollector)
+	bindQueue  (ExInventory, QuInventoryToCollector)
 
-	createExchange(ExCollectorUpload)
-	createQueue(QuCollectorUploadToIngester)
-	bindQueue(ExCollectorUpload, QuCollectorUploadToIngester)
+	createExchange(ExCollector)
+	createQueue(QuCollectorToIngester)
+	bindQueue(ExCollector, QuCollectorToIngester)
+
+	createExchange(ExRuntime)
+	createQueue(QuRuntimeToPortfolio)
+	bindQueue(ExRuntime, QuRuntimeToPortfolio)
 }
 
 //=============================================================================
@@ -101,7 +108,7 @@ func PublishToExchange(exchange string, message any) error {
 
 //=============================================================================
 
-func SendMessage(exchange string, origin int, msgType int, source string, entity any) error {
+func SendMessage(exchange string, source string, msgType int, entity any) error {
 	body, err := json.Marshal(entity)
 	if err != nil {
 		slog.Error("Error marshalling message", "error", err.Error())
@@ -109,9 +116,8 @@ func SendMessage(exchange string, origin int, msgType int, source string, entity
 	}
 
 	message := &Message{
-		Origin: origin,
-		Type  : msgType,
 		Source: source,
+		Type  : msgType,
 		Entity: body,
 	}
 
@@ -129,7 +135,7 @@ func ReceiveMessages(queue string, handler func(m *Message) bool) {
 
 	for d := range messages {
 		msg := Message{}
-		err := json.Unmarshal(d.Body, &msg)
+		err = json.Unmarshal(d.Body, &msg)
 
 		if err != nil {
 			slog.Error("Error unmarshalling message. Rejecting.", "error", err.Error())
