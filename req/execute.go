@@ -63,6 +63,7 @@ func GetClient(id string) *http.Client {
 func DoGet(client *http.Client, url string, output any, token string) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
+		slog.Error("Error creating a GET request", "error", err.Error())
 		return err
 	}
 
@@ -71,7 +72,7 @@ func DoGet(client *http.Client, url string, output any, token string) error {
 	}
 
 	res, err := client.Do(req)
-	return buildResponse(res, err, &output)
+	return BuildResponse(res, err, &output)
 }
 
 //=============================================================================
@@ -87,6 +88,7 @@ func DoPost(client *http.Client, url string, params any, output any, token strin
 
 	req, err := http.NewRequest("POST", url, reader)
 	if err != nil {
+		slog.Error("Error creating a POST request", "error", err.Error())
 		return err
 	}
 	req.Header.Set("Content-Type", "Application/json")
@@ -96,7 +98,7 @@ func DoPost(client *http.Client, url string, params any, output any, token strin
 	}
 
 	res, err := client.Do(req)
-	return buildResponse(res, err, &output)
+	return BuildResponse(res, err, &output)
 }
 
 //=============================================================================
@@ -112,6 +114,7 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 
 	req, err := http.NewRequest("PUT", url, reader)
 	if err != nil {
+		slog.Error("Error creating a PUT request", "error", err.Error())
 		return err
 	}
 	req.Header.Set("Content-Type", "Application/json")
@@ -121,7 +124,7 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 	}
 
 	res, err := client.Do(req)
-	return buildResponse(res, err, &output)
+	return BuildResponse(res, err, &output)
 }
 
 //=============================================================================
@@ -138,39 +141,12 @@ func DoDelete(client *http.Client, url string, output any, token string) error {
 	}
 
 	res, err := client.Do(req)
-	return buildResponse(res, err, &output)
-}
-
-//=============================================================================
-//===
-//=== Private methods
-//===
-//=============================================================================
-
-func createClient(caCert string, clientCert string, clientKey string) *http.Client {
-	cert, err := os.ReadFile("config/"+ caCert)
-	core.ExitIfError(err)
-
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(cert)
-
-	certificate, err := tls.LoadX509KeyPair("config/"+ clientCert, "config/"+ clientKey)
-	core.ExitIfError(err)
-
-	return &http.Client{
-		Timeout: time.Minute * 3,
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs:      caCertPool,
-				Certificates: []tls.Certificate{certificate},
-			},
-		},
-	}
+	return BuildResponse(res, err, &output)
 }
 
 //=============================================================================
 
-func buildResponse(res *http.Response, err error, output any) error {
+func BuildResponse(res *http.Response, err error, output any) error {
 	if err != nil {
 		slog.Error("Error sending request", "error", err.Error())
 		return err
@@ -202,9 +178,37 @@ func buildResponse(res *http.Response, err error, output any) error {
 	err = json.Unmarshal(body, &output)
 	if err != nil {
 		slog.Error("Bad JSON response from server", "error", err.Error())
+		return err
 	}
 
 	return nil
+}
+
+//=============================================================================
+//===
+//=== Private methods
+//===
+//=============================================================================
+
+func createClient(caCert string, clientCert string, clientKey string) *http.Client {
+	cert, err := os.ReadFile("config/"+ caCert)
+	core.ExitIfError(err)
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(cert)
+
+	certificate, err := tls.LoadX509KeyPair("config/"+ clientCert, "config/"+ clientKey)
+	core.ExitIfError(err)
+
+	return &http.Client{
+		Timeout: time.Minute * 3,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs:      caCertPool,
+				Certificates: []tls.Certificate{certificate},
+			},
+		},
+	}
 }
 
 //=============================================================================
