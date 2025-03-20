@@ -191,11 +191,13 @@ func BuildResponse(res *http.Response, err error, output any) error {
 //=============================================================================
 
 func createClient(caCert string, clientCert string, clientKey string) *http.Client {
-	cert, err := os.ReadFile("config/"+ caCert)
-	core.ExitIfError(err)
-
 	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(cert)
+
+	if caCert != "" {
+		cert, err := os.ReadFile("config/"+ caCert)
+		core.ExitIfError(err)
+		caCertPool.AppendCertsFromPEM(cert)
+	}
 
 	certificate, err := tls.LoadX509KeyPair("config/"+ clientCert, "config/"+ clientKey)
 	core.ExitIfError(err)
