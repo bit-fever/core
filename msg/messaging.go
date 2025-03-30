@@ -38,6 +38,7 @@ import (
 const ExInventory            = "bf.inventory"
 const QuInventoryToPortfolio = "bf.inventory:portfolio"
 const QuInventoryToCollector = "bf.inventory:collector"
+const QuInventoryToStorage   = "bf.inventory:storage"
 
 const ExCollector            = "bf.collector"
 const QuCollectorToIngester  = "bf.collector:ingester"
@@ -71,6 +72,8 @@ func InitMessaging(cfg *core.Messaging) {
 	bindQueue  (ExInventory, QuInventoryToPortfolio)
 	createQueue(QuInventoryToCollector)
 	bindQueue  (ExInventory, QuInventoryToCollector)
+	createQueue(QuInventoryToStorage)
+	bindQueue  (ExInventory, QuInventoryToStorage)
 
 	createExchange(ExCollector)
 	createQueue(QuCollectorToIngester)
@@ -90,7 +93,7 @@ func PublishToExchange(exchange string, message any) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	err = channel.PublishWithContext(ctx, exchange, "", false, false,
