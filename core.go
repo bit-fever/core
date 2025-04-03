@@ -60,6 +60,8 @@ type Platform struct {
 	System    string
 	Inventory string
 	Data      string
+	Storage   string
+	Portfolio string
 }
 
 //=============================================================================
