@@ -40,6 +40,12 @@ import (
 
 //=============================================================================
 
+const (
+	ApplicationJson = "application/json"
+)
+
+//=============================================================================
+
 var clientMap = map[string] *http.Client {}
 
 //=============================================================================
@@ -91,7 +97,7 @@ func DoPost(client *http.Client, url string, params any, output any, token strin
 		slog.Error("Error creating a POST request", "error", err.Error())
 		return err
 	}
-	req.Header.Set("Content-Type", "Application/json")
+	req.Header.Set("Content-Type", ApplicationJson)
 
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+ token)
@@ -117,7 +123,7 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 		slog.Error("Error creating a PUT request", "error", err.Error())
 		return err
 	}
-	req.Header.Set("Content-Type", "Application/json")
+	req.Header.Set("Content-Type", ApplicationJson)
 
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+ token)
