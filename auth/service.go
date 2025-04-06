@@ -59,6 +59,20 @@ func (c *Context) ReturnList(result any, offset int, limit int, size int) error 
 
 //=============================================================================
 
+func (c *Context) ReturnObject(data any) error {
+	c.Gin.JSON(http.StatusOK, data)
+	return nil
+}
+
+//=============================================================================
+
+func (c *Context) ReturnData(contentType string, data []byte) error {
+	c.Gin.Data(http.StatusOK, contentType, data)
+	return nil
+}
+
+//=============================================================================
+
 func (c *Context) GetPagingParams() (offset int, limit int, errV error) {
 	return req.GetPagingParams(c.Gin)
 }
@@ -109,13 +123,6 @@ func (c *Context) GetId2FromUrl() (uint, error) {
 
 func (c *Context) GetCodeFromUrl() string {
 	return c.Gin.Param("code")
-}
-
-//=============================================================================
-
-func (c *Context) ReturnObject(data any) error {
-	c.Gin.JSON(http.StatusOK, data)
-	return nil
 }
 
 //=============================================================================
