@@ -135,12 +135,21 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 
 //=============================================================================
 
-func DoDelete(client *http.Client, url string, output any, token string) error {
-	req, err := http.NewRequest("DELETE", url, nil)
+func DoDelete(client *http.Client, url string, params any, output any, token string) error {
+	body, err := json.Marshal(&params)
+	if err != nil {
+		slog.Error("Error marshalling DELETE parameter", "error", err.Error())
+		return err
+	}
+
+	reader := bytes.NewReader(body)
+
+	req, err := http.NewRequest("DELETE", url, reader)
 	if err != nil {
 		slog.Error("Error creating a DELETE request", "error", err.Error())
 		return err
 	}
+	req.Header.Set("Content-Type", ApplicationJson)
 
 	if token != "" {
 		req.Header.Set("Authorization", "Bearer "+ token)
