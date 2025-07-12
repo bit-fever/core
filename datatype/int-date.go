@@ -86,7 +86,7 @@ func (dt IntDate) IsValid() bool {
 
 //=============================================================================
 
-func (dt IntDate) toDateTime(endDay bool, loc *time.Location) time.Time {
+func (dt IntDate) ToDateTime(endDay bool, loc *time.Location) time.Time {
 	hh := 0
 	mm := 0
 	ss := 0
