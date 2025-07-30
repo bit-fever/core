@@ -33,15 +33,16 @@ const (
 	TypeActivate   = 4
 	TypeDeactivate = 5
 	TypeNewJob     = 6
+	TypeChange     = 7
 
 	//--- Inventory server
 
 	SourceTradingSystem  = "trading-system"
 	SourceDataProduct    = "data-product"
 	SourceBrokerProduct  = "broker-product"
-	SourceConnection     = "connection"
 	SourcePortfolio      = "portfolio"
 	SourceTradingSession = "trading-session"
+	SourceConnection     = "connection"
 
 	//--- Data Collector
 

@@ -46,6 +46,11 @@ const QuCollectorToIngester  = "bf.collector:ingester"
 const ExRuntime              = "bf.runtime"
 const QuRuntimeToPortfolio   = "bf.runtime:portfolio"
 
+const ExSystem               = "bf.system"
+const QuSystemToInventory    = "bf.system:inventory"
+const QuSystemToCollector    = "bf.system:collector"
+const QuSystemToPortfolio    = "bf.system:portfolio"
+
 var channel *amqp.Channel
 
 //=============================================================================
@@ -82,6 +87,14 @@ func InitMessaging(cfg *core.Messaging) {
 	createExchange(ExRuntime)
 	createQueue(QuRuntimeToPortfolio)
 	bindQueue(ExRuntime, QuRuntimeToPortfolio)
+
+	createExchange(ExSystem)
+	createQueue(QuSystemToCollector)
+	bindQueue(ExSystem, QuSystemToCollector)
+	createQueue(QuSystemToInventory)
+	bindQueue(ExSystem, QuSystemToInventory)
+	createQueue(QuSystemToPortfolio)
+	bindQueue(ExSystem, QuSystemToPortfolio)
 }
 
 //=============================================================================
