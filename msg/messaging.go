@@ -35,22 +35,6 @@ import (
 
 //=============================================================================
 
-const ExInventory            = "bf.inventory"
-const QuInventoryToPortfolio = "bf.inventory:portfolio"
-const QuInventoryToCollector = "bf.inventory:collector"
-const QuInventoryToStorage   = "bf.inventory:storage"
-
-const ExCollector            = "bf.collector"
-const QuCollectorToIngester  = "bf.collector:ingester"
-
-const ExRuntime              = "bf.runtime"
-const QuRuntimeToPortfolio   = "bf.runtime:portfolio"
-
-const ExSystem               = "bf.system"
-const QuSystemToInventory    = "bf.system:inventory"
-const QuSystemToCollector    = "bf.system:collector"
-const QuSystemToPortfolio    = "bf.system:portfolio"
-
 var channel *amqp.Channel
 
 //=============================================================================

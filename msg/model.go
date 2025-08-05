@@ -60,6 +60,26 @@ const (
 
 //=============================================================================
 
+const (
+	ExInventory            = "bf.inventory"
+	QuInventoryToPortfolio = "bf.inventory:portfolio"
+	QuInventoryToCollector = "bf.inventory:collector"
+	QuInventoryToStorage   = "bf.inventory:storage"
+
+	ExCollector            = "bf.collector"
+	QuCollectorToIngester  = "bf.collector:ingester"
+
+	ExRuntime              = "bf.runtime"
+	QuRuntimeToPortfolio   = "bf.runtime:portfolio"
+
+	ExSystem               = "bf.system"
+	QuSystemToInventory    = "bf.system:inventory"
+	QuSystemToCollector    = "bf.system:collector"
+	QuSystemToPortfolio    = "bf.system:portfolio"
+)
+
+//=============================================================================
+
 type Message struct {
 	Source string
 	Type   int
