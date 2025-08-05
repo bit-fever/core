@@ -34,23 +34,28 @@ const (
 	TypeDeactivate = 5
 	TypeNewJob     = 6
 	TypeChange     = 7
+	TypeRestart    = 8
 
-	//--- Inventory server
+	//--- Queue: Inventory
 
 	SourceTradingSystem  = "trading-system"
 	SourceDataProduct    = "data-product"
 	SourceBrokerProduct  = "broker-product"
 	SourcePortfolio      = "portfolio"
 	SourceTradingSession = "trading-session"
-	SourceConnection     = "connection"
 
-	//--- Data Collector
+	//--- Queue: Data Collector
 
 	SourceUploadJob      = "upload-job"
 
-	//--- Runtime system
+	//--- Queue: Runtime system
 
 	SourceTrade          = "trade"
+
+	//--- Queue: System adapter
+
+	SourceConnection     = "connection"
+	SourceSystem         = "system"
 )
 
 //=============================================================================
