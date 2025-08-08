@@ -42,6 +42,7 @@ import (
 
 const (
 	ApplicationJson = "application/json"
+	OnBehalfOf      = "OnBehalfOf"
 )
 
 //=============================================================================
@@ -67,15 +68,19 @@ func GetClient(id string) *http.Client {
 //=============================================================================
 
 func DoGet(client *http.Client, url string, output any, token string) error {
+	return DoGetOnBehalfOf(client, url, output, token, "")
+}
+
+//=============================================================================
+
+func DoGetOnBehalfOf(client *http.Client, url string, output any, token string, onBehalfOf string) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		slog.Error("Error creating a GET request", "error", err.Error())
 		return err
 	}
 
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+ token)
-	}
+	setupHeader(&req.Header, token, onBehalfOf)
 
 	res, err := client.Do(req)
 	return BuildResponse(res, err, &output)
@@ -84,6 +89,12 @@ func DoGet(client *http.Client, url string, output any, token string) error {
 //=============================================================================
 
 func DoPost(client *http.Client, url string, params any, output any, token string) error {
+	return DoPostOnBehalfOf(client, url, params, output, token, "")
+}
+
+//=============================================================================
+
+func DoPostOnBehalfOf(client *http.Client, url string, params any, output any, token string, onBehalfOf string) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
 		slog.Error("Error marshalling POST parameter", "error", err.Error())
@@ -97,11 +108,8 @@ func DoPost(client *http.Client, url string, params any, output any, token strin
 		slog.Error("Error creating a POST request", "error", err.Error())
 		return err
 	}
-	req.Header.Set("Content-Type", ApplicationJson)
 
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+ token)
-	}
+	setupHeader(&req.Header, token, onBehalfOf)
 
 	res, err := client.Do(req)
 	return BuildResponse(res, err, &output)
@@ -110,6 +118,12 @@ func DoPost(client *http.Client, url string, params any, output any, token strin
 //=============================================================================
 
 func DoPut(client *http.Client, url string, params any, output any, token string) error {
+	return DoPutBehalfOf(client, url, params, output, token, "")
+}
+
+//=============================================================================
+
+func DoPutBehalfOf(client *http.Client, url string, params any, output any, token string, onBehalfOf string) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
 		slog.Error("Error marshalling PUT parameter", "error", err.Error())
@@ -123,11 +137,8 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 		slog.Error("Error creating a PUT request", "error", err.Error())
 		return err
 	}
-	req.Header.Set("Content-Type", ApplicationJson)
 
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+ token)
-	}
+	setupHeader(&req.Header, token, onBehalfOf)
 
 	res, err := client.Do(req)
 	return BuildResponse(res, err, &output)
@@ -136,6 +147,12 @@ func DoPut(client *http.Client, url string, params any, output any, token string
 //=============================================================================
 
 func DoDelete(client *http.Client, url string, params any, output any, token string) error {
+	return DoDeleteBehalfOf(client, url, params, output, token, "")
+}
+
+//=============================================================================
+
+func DoDeleteBehalfOf(client *http.Client, url string, params any, output any, token string, onBehalfOf string) error {
 	body, err := json.Marshal(&params)
 	if err != nil {
 		slog.Error("Error marshalling DELETE parameter", "error", err.Error())
@@ -149,11 +166,8 @@ func DoDelete(client *http.Client, url string, params any, output any, token str
 		slog.Error("Error creating a DELETE request", "error", err.Error())
 		return err
 	}
-	req.Header.Set("Content-Type", ApplicationJson)
 
-	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+ token)
-	}
+	setupHeader(&req.Header, token, onBehalfOf)
 
 	res, err := client.Do(req)
 	return BuildResponse(res, err, &output)
@@ -225,6 +239,20 @@ func createClient(caCert string, clientCert string, clientKey string) *http.Clie
 				Certificates: []tls.Certificate{certificate},
 			},
 		},
+	}
+}
+
+//=============================================================================
+
+func setupHeader(header *http.Header, token, onBehalfOf string) {
+	header.Set("Content-Type", ApplicationJson)
+
+	if token != "" {
+		header.Set("Authorization", "Bearer "+ token)
+	}
+
+	if onBehalfOf != "" {
+		header.Set(OnBehalfOf, onBehalfOf)
 	}
 }
 

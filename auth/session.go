@@ -32,14 +32,15 @@ import (
 //=============================================================================
 
 type UserSession struct {
-	SessionID string
-	Username  string
-	Name      string
-	Surname   string
-	Email     string
-	IssuedAt  time.Time
-	Expiry    time.Time
-	Roles     map[role.Role]any
+	SessionID  string
+	Username   string
+	OnBehalfOf string
+	Name       string
+	Surname    string
+	Email      string
+	IssuedAt   time.Time
+	Expiry     time.Time
+	Roles      map[role.Role]any
 }
 
 //=============================================================================

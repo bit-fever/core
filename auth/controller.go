@@ -88,6 +88,8 @@ func NewOidcController(authority string, client *http.Client, logger *slog.Logge
 func (oc *OidcController) Secure(h RestService, roles []role.Role) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		rawAccessToken := c.Request.Header.Get("Authorization")
+		onBehalfOf     := c.Request.Header.Get(req.OnBehalfOf)
+
 		tokens := strings.Split(rawAccessToken, " ")
 		if len(tokens) != 2 {
 			req.ReturnUnauthorizedError(c, "Authorisation failed due to a bad header")
@@ -106,7 +108,7 @@ func (oc *OidcController) Secure(h RestService, roles []role.Role) func(c *gin.C
 			return
 		}
 
-		us := buildUserSession(&ut, idToken)
+		us := buildUserSession(&ut, idToken, onBehalfOf)
 
 		if ! us.IsUserInRole(roles) {
 			req.ReturnForbiddenError(c, "User not allowed to access this API: "+ us.Username)
@@ -140,16 +142,21 @@ func (oc *OidcController) createLogger(us *UserSession, c *gin.Context) *slog.Lo
 //===
 //=============================================================================
 
-func buildUserSession(ut *userToken, it *oidc.IDToken) *UserSession {
+func buildUserSession(ut *userToken, it *oidc.IDToken, onBehalfOf string) *UserSession {
+	if onBehalfOf == "" {
+		onBehalfOf = ut.Username
+	}
+
 	return &UserSession{
-		SessionID: ut.SID,
-		Username : ut.Username,
-		Name     : ut.Name,
-		Surname  : ut.Surname,
-		Email    : ut.Email,
-		IssuedAt : it.IssuedAt,
-		Expiry   : it.Expiry,
-		Roles    : buildRoleMap(ut),
+		SessionID : ut.SID,
+		Username  : ut.Username,
+		OnBehalfOf: onBehalfOf,
+		Name      : ut.Name,
+		Surname   : ut.Surname,
+		Email     : ut.Email,
+		IssuedAt  : it.IssuedAt,
+		Expiry    : it.Expiry,
+		Roles     : buildRoleMap(ut),
 	}
 }
 
