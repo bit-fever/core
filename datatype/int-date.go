@@ -54,7 +54,7 @@ func (dt IntDate) Day() int {
 //=============================================================================
 
 func (dt IntDate) String() string {
-	return fmt.Sprintf("%4d-%2d-%2d", dt.Year(), dt.Month(), dt.Day())
+	return fmt.Sprintf("%4d-%02d-%02d", dt.Year(), dt.Month(), dt.Day())
 }
 
 //=============================================================================
@@ -98,12 +98,6 @@ func (dt IntDate) ToDateTime(endDay bool, loc *time.Location) time.Time {
 	}
 
 	return time.Date(dt.Year(), time.Month(dt.Month()), dt.Day(), hh, mm, ss, 0, loc)
-}
-
-//=============================================================================
-
-func (dt IntDate) ToDate() string {
-	return fmt.Sprintf("%d-%02d-%02d", dt.Year(), dt.Month(), dt.Day())
 }
 
 //=============================================================================

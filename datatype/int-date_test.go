@@ -43,9 +43,9 @@ func TestToIntDate(t *testing.T) {
 
 //=============================================================================
 
-func TestToDate(t *testing.T) {
+func TestString(t *testing.T) {
 	id  := IntDate(20250503)
-	sd  := id.ToDate()
+	sd  := id.String()
 	exp := "2025-05-03"
 
 	if sd != exp {
