@@ -25,7 +25,9 @@ THE SOFTWARE.
 package datatype
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -66,6 +68,10 @@ func (dt IntDate) IsNil() bool {
 //=============================================================================
 
 func (dt IntDate) IsValid() bool {
+	if dt < 0 {
+		return false
+	}
+
 	d := dt.Day()
 	m := dt.Month()
 
@@ -114,6 +120,31 @@ func ToIntDate(t *time.Time) IntDate {
 	y,m,d := t.Date()
 
 	return IntDate(y*10000 + int(m)*100 + d)
+}
+
+//=============================================================================
+
+func ParseIntDate(value string, required bool) (IntDate, error) {
+	if value == "" {
+		if required {
+			return 0, errors.New("Value is required")
+		}
+
+		return 0,nil
+	}
+
+	d,err := strconv.Atoi(value)
+	if err != nil {
+		return 0, err
+	}
+
+	id := IntDate(d)
+
+	if !id.IsValid() {
+		return 0, errors.New("Invalid date")
+	}
+
+	return id, nil
 }
 
 //=============================================================================

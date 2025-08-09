@@ -54,3 +54,33 @@ func TestString(t *testing.T) {
 }
 
 //=============================================================================
+
+func TestParseIntDate(t *testing.T) {
+	sd  := "20250503"
+	exp := IntDate(20250503)
+
+	id,err := ParseIntDate(sd, true)
+	if err != nil {
+		t.Errorf("ParseIntDate failed. Expected %v but got %v", exp, id)
+	}
+
+	//---
+
+	sd = "-20250503"
+
+	id,err = ParseIntDate(sd, true)
+	if err == nil {
+		t.Errorf("ParseIntDate failed. Date is indicated as valid but it is not: %v", id)
+	}
+
+	//---
+
+	sd = ""
+
+	id,err = ParseIntDate(sd, false)
+	if err != nil || !id.IsNil() {
+		t.Errorf("ParseIntDate failed. Date is nil but got a valid date: %v", id)
+	}
+}
+
+//=============================================================================
