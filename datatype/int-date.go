@@ -101,3 +101,25 @@ func (dt IntDate) ToDateTime(endDay bool, loc *time.Location) time.Time {
 }
 
 //=============================================================================
+
+func (dt IntDate) ToDate() string {
+	return fmt.Sprintf("%d-%02d-%02d", dt.Year(), dt.Month(), dt.Day())
+}
+
+//=============================================================================
+//===
+//=== General functions
+//===
+//=============================================================================
+
+func ToIntDate(t *time.Time) IntDate {
+	if t == nil {
+		return 0
+	}
+
+	y,m,d := t.Date()
+
+	return IntDate(y*10000 + int(m)*100 + d)
+}
+
+//=============================================================================
