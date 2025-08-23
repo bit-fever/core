@@ -107,6 +107,24 @@ func (dt IntDate) ToDateTime(endDay bool, loc *time.Location) time.Time {
 }
 
 //=============================================================================
+
+func (dt IntDate) AddDays(days int) IntDate {
+	t := dt.ToDateTime(false,time.UTC)
+	t.Add(time.Duration(days) * 24 * time.Hour)
+
+	y,m,d := t.Date()
+
+	return IntDate(y*10000 + int(m)*100 + d)
+}
+
+//=============================================================================
+
+func (dt IntDate) IsToday() bool {
+	now := time.Now().UTC()
+	return dt == ToIntDate(&now)
+}
+
+//=============================================================================
 //===
 //=== General functions
 //===
