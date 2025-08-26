@@ -110,7 +110,7 @@ func (dt IntDate) ToDateTime(endDay bool, loc *time.Location) time.Time {
 
 func (dt IntDate) AddDays(days int) IntDate {
 	t := dt.ToDateTime(false,time.UTC)
-	t.Add(time.Duration(days) * 24 * time.Hour)
+	t = t.Add(time.Duration(days) * 24 * time.Hour)
 
 	y,m,d := t.Date()
 
@@ -119,9 +119,8 @@ func (dt IntDate) AddDays(days int) IntDate {
 
 //=============================================================================
 
-func (dt IntDate) IsToday() bool {
-	now := time.Now().UTC()
-	return dt == ToIntDate(&now)
+func (dt IntDate) IsToday(loc *time.Location) bool {
+	return dt == Today(loc)
 }
 
 //=============================================================================
@@ -163,6 +162,13 @@ func ParseIntDate(value string, required bool) (IntDate, error) {
 	}
 
 	return id, nil
+}
+
+//=============================================================================
+
+func Today(loc *time.Location) IntDate {
+	tn := time.Now().In(loc)
+	return ToIntDate(&tn)
 }
 
 //=============================================================================
