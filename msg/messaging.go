@@ -27,10 +27,11 @@ package msg
 import (
 	"context"
 	"encoding/json"
-	"github.com/bit-fever/core"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"log/slog"
 	"time"
+
+	"github.com/bit-fever/core"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 //=============================================================================
@@ -67,6 +68,8 @@ func InitMessaging(cfg *core.Messaging) {
 	createExchange(ExCollector)
 	createQueue(QuCollectorToIngester)
 	bindQueue(ExCollector, QuCollectorToIngester)
+	createQueue(QuCollectorToRoller)
+	bindQueue(ExCollector, QuCollectorToRoller)
 
 	createExchange(ExRuntime)
 	createQueue(QuRuntimeToPortfolio)

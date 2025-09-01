@@ -47,6 +47,7 @@ const (
 	//--- Queue: Data Collector
 
 	SourceUploadJob      = "upload-job"
+	SourceRollRecalcJob  = "rollRecalc-job"
 
 	//--- Queue: Runtime system
 
@@ -68,6 +69,7 @@ const (
 
 	ExCollector            = "bf.collector"
 	QuCollectorToIngester  = "bf.collector:ingester"
+	QuCollectorToRoller    = "bf.collector:roller"
 
 	ExRuntime              = "bf.runtime"
 	QuRuntimeToPortfolio   = "bf.runtime:portfolio"
