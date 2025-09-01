@@ -68,8 +68,7 @@ const (
 	QuInventoryToStorage   = "bf.inventory:storage"
 
 	ExCollector            = "bf.collector"
-	QuCollectorToIngester  = "bf.collector:ingester"
-	QuCollectorToRoller    = "bf.collector:roller"
+	QuCollectorToInternal  = "bf.collector:internal"
 
 	ExRuntime              = "bf.runtime"
 	QuRuntimeToPortfolio   = "bf.runtime:portfolio"

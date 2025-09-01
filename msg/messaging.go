@@ -66,10 +66,8 @@ func InitMessaging(cfg *core.Messaging) {
 	bindQueue  (ExInventory, QuInventoryToStorage)
 
 	createExchange(ExCollector)
-	createQueue(QuCollectorToIngester)
-	bindQueue(ExCollector, QuCollectorToIngester)
-	createQueue(QuCollectorToRoller)
-	bindQueue(ExCollector, QuCollectorToRoller)
+	createQueue(QuCollectorToInternal)
+	bindQueue(ExCollector, QuCollectorToInternal)
 
 	createExchange(ExRuntime)
 	createQueue(QuRuntimeToPortfolio)
