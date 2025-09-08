@@ -36,6 +36,7 @@ import (
 
 //=============================================================================
 
+var url      string
 var channel *amqp.Channel
 
 //=============================================================================
@@ -43,19 +44,12 @@ var channel *amqp.Channel
 func InitMessaging(cfg *core.Messaging) {
 
 	slog.Info("Starting messaging...")
-	url := "amqp://"+ cfg.Username + ":" + cfg.Password + "@" + cfg.Address + "/"
+	url = "amqp://"+ cfg.Username + ":" + cfg.Password + "@" + cfg.Address + "/"
 
-	conn, err := amqp.Dial(url)
+	err := connect()
 	if err != nil {
-		core.ExitWithMessage("Failed to connect to the messaging system: "+ err.Error())
+		core.ExitWithMessage("Failed to connect to the messaging system or to get a channel: "+ err.Error())
 	}
-
-	ch, err := conn.Channel()
-	if err != nil {
-		core.ExitWithMessage("Failed to get a channel from the messaging system: "+ err.Error())
-	}
-
-	channel = ch
 
 	createExchange(ExInventory)
 	createQueue(QuInventoryToPortfolio)
@@ -89,6 +83,14 @@ func PublishToExchange(exchange string, message any) error {
 	if err != nil {
 		slog.Error("Error marshalling message", "error", err.Error())
 		return err
+	}
+
+	if channel.IsClosed() {
+		slog.Warn("Channel is closed. Reconnecting...")
+		err = connect()
+		if err != nil {
+			return err
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -191,6 +193,17 @@ func bindQueue(exchange, queue string) {
 	if err != nil {
 		core.ExitWithMessage("Cannot bind queue '"+ queue +"' to the exchange: "+ err.Error())
 	}
+}
+
+//=============================================================================
+
+func connect() error {
+	conn, err := amqp.Dial(url)
+	if err == nil {
+		channel, err = conn.Channel()
+	}
+
+	return err
 }
 
 //=============================================================================
