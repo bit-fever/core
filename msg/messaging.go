@@ -74,6 +74,10 @@ func InitMessaging(cfg *core.Messaging) {
 	bindQueue(ExSystem, QuSystemToInventory)
 	createQueue(QuSystemToPortfolio)
 	bindQueue(ExSystem, QuSystemToPortfolio)
+
+	createExchange(ExEvent)
+	createQueue(QuAllToEvent)
+	bindQueue(ExEvent, QuAllToEvent)
 }
 
 //=============================================================================
@@ -130,34 +134,38 @@ func SendMessage(exchange string, source string, msgType int, entity any) error 
 //=============================================================================
 
 func ReceiveMessages(queue string, handler func(m *Message) bool) {
-	messages, err := channel.Consume(queue,"",false,false,false,false,nil)
-
-	if err != nil {
-		core.ExitWithMessage("Cannot create the consumer channel for '"+ queue +"' : "+ err.Error())
-	}
-
-	for d := range messages {
-		msg := Message{}
-		err = json.Unmarshal(d.Body, &msg)
+	for {
+		messages, err := channel.Consume(queue,"",false,false,false,false,nil)
 
 		if err != nil {
-			slog.Error("Error unmarshalling message. Rejecting.", "error", err.Error())
-			err = d.Reject(false)
+			core.ExitWithMessage("ReceiveMessages: Cannot create the consumer channel for '"+ queue +"' : "+ err.Error())
+		}
+
+		for d := range messages {
+			msg := Message{}
+			err = json.Unmarshal(d.Body, &msg)
+
 			if err != nil {
-				slog.Error("Cannot reject message!", "error", err.Error())
+				slog.Error("ReceiveMessages: Error unmarshalling message. Rejecting.", "error", err.Error())
+				err = d.Reject(false)
+				if err != nil {
+					slog.Error("ReceiveMessages: Cannot reject message!", "error", err.Error())
+				}
+				continue
 			}
-			continue
+
+			if handler(&msg) {
+				err = d.Ack(false)
+			} else {
+				err = d.Nack(false, true)
+			}
+
+			if err != nil {
+				slog.Error("ReceiveMessages: Cannot [N]acknowledge message!", "error", err.Error())
+			}
 		}
 
-		if handler(&msg) {
-			err = d.Ack(false)
-		} else {
-			err = d.Nack(false, true)
-		}
-
-		if err != nil {
-			slog.Error("Cannot [N]acknowledge message!", "error", err.Error())
-		}
+		slog.Warn("ReceiveMessages: Exited from for loop. Reconnecting...")
 	}
 }
 

@@ -57,6 +57,10 @@ const (
 
 	SourceConnection     = "connection"
 	SourceSystem         = "system"
+
+	//--- Queue: Event store
+
+	SourceEvent          = "event"
 )
 
 //=============================================================================
@@ -77,6 +81,9 @@ const (
 	QuSystemToInventory    = "bf.system:inventory"
 	QuSystemToCollector    = "bf.system:collector"
 	QuSystemToPortfolio    = "bf.system:portfolio"
+
+	ExEvent                = "bf.event"
+	QuAllToEvent           = "bf.all:event"
 )
 
 //=============================================================================
