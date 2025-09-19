@@ -32,19 +32,19 @@ import "time"
 //===
 //=============================================================================
 
-type EventType int8
+type EventLevel int8
 
 const (
-	EventTypeInfo    = 0
-	EventTypeWarning = 1
-	EventTypeError   = 2
+	EventLevelInfo    = 0
+	EventLevelWarning = 1
+	EventLevelError   = 2
 )
 
 //=============================================================================
 
 type Event struct {
 	Username   string
-	Type       EventType
+	Level      EventLevel
 	EventDate  time.Time
 	Code       string
 	Title      string
@@ -54,10 +54,9 @@ type Event struct {
 
 //=============================================================================
 
-func SendEventByCode(username string, et EventType, code string, params map[string]any) error {
+func SendEventByCode(username string, code string, params map[string]any) error {
 	e := Event{
 		Username  : username,
-		Type      : et,
 		EventDate : time.Now(),
 		Code      : code,
 		Parameters: params,
@@ -68,10 +67,10 @@ func SendEventByCode(username string, et EventType, code string, params map[stri
 
 //=============================================================================
 
-func SendEvent(username string, et EventType, title, message string, params map[string]any) error {
+func SendEvent(username string, level EventLevel, title, message string, params map[string]any) error {
 	e := Event{
 		Username  : username,
-		Type      : et,
+		Level     : level,
 		EventDate : time.Now(),
 		Title     : title,
 		Message   : message,
