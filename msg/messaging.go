@@ -166,6 +166,15 @@ func ReceiveMessages(queue string, handler func(m *Message) bool) {
 		}
 
 		slog.Warn("ReceiveMessages: Exited from for loop. Reconnecting...")
+
+		if channel.IsClosed() {
+			err = connect()
+			if err != nil {
+				core.ExitWithMessage("ReceiveMessages: Cannot reconnect to the channel: "+ err.Error())
+			} else {
+				slog.Info("ReceiveMessages: Successfully reconnected")
+			}
+		}
 	}
 }
 
