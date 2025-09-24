@@ -27,15 +27,16 @@ package req
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 //=============================================================================
 
 type AppError struct {
-	Code  int
+	Code    int
 	Message string
 }
 
@@ -74,9 +75,27 @@ func NewNotFoundError(message string, params ...any) error {
 
 //=============================================================================
 
+func NewUnprocessableEntityError(message string, params ...any) error {
+	return AppError {
+		Code:    http.StatusUnprocessableEntity,
+		Message: fmt.Sprintf(message, params),
+	}
+}
+
+//=============================================================================
+
 func NewServerError(message string, params ...any) error {
 	return AppError {
 		Code:    http.StatusInternalServerError,
+		Message: fmt.Sprintf(message, params),
+	}
+}
+
+//=============================================================================
+
+func NewServiceUnavailableError(message string, params ...any) error {
+	return AppError {
+		Code:    http.StatusServiceUnavailable,
 		Message: fmt.Sprintf(message, params),
 	}
 }
